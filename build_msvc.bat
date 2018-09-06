@@ -1,8 +1,8 @@
 @echo off
 
 set PROJECT=ptimer
-set COMPILER_OPTIONS=-O2 -EHsc -nologo -W4 -WX -MD -permissive- -std:c++17
-set COMPILER_DEFINES=-D%PROJECT%_INTERNAL
+set COMPILER_OPTIONS=-O2 -Oi -GS- -nologo -W4 -WX -permissive- -std:c++17
+set COMPILER_DEFINES=-D%PROJECT%_INTERNAL -DWIN32_LEAN_AND_MEAN
 set LINKER_OPTIONS=-out:ptimer.exe -subsystem:console
 set LINKER_LIBRARIES=
 
