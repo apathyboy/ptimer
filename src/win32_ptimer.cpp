@@ -26,15 +26,8 @@ internal char *ParseCommandLine()
 {
     LPSTR cmdLine = GetCommandLineA();
 
-    if (*cmdLine == '"') {
+    while (*cmdLine && *cmdLine != ' ' && *cmdLine != '\t') {
         ++cmdLine;
-        while (*cmdLine++ != '"')
-            ;
-    }
-    else {
-        while (*cmdLine && *cmdLine != ' ' && *cmdLine != '\t') {
-            ++cmdLine;
-        }
     }
 
     while (*cmdLine == ' ' || *cmdLine == '\t') {
