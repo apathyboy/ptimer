@@ -1,42 +1,13 @@
 
-#include <cstdint>
 #include <cstdio>
-#include <string>
 
 #include <Windows.h>
 
 #define internal static
 
-using namespace std;
-
-struct CommandLineInput {
-    bool echo = true;
-    string command;
-};
-
-internal CommandLineInput GetCommandStringFromInput(int argc, char **argv)
-{
-    if (argc < 2) {
-        printf("Usage: ptimer <process command>");
-        ExitProcess(EXIT_FAILURE);
-    }
-
-    CommandLineInput input = {};
-
-    int index     = 1; // @note(eb): start index at 1 because element 0 is the exe name
-    input.command = argv[index++];
-
-    if (input.command.compare("-q") == 0) {
-        input.echo    = false;
-        input.command = argv[index++];
-    }
-
-    for (; index < argc; ++index) {
-        input.command.append(" ").append(argv[index]);
-    }
-
-    return input;
-}
+#define EXIT_FAILURE 1
+#define EXIT_SUCCESS 0
+#define INVALID_INDEX -1
 
 internal void ExecuteCommand(char *cmd)
 {
@@ -51,20 +22,40 @@ internal void ExecuteCommand(char *cmd)
     WaitForSingleObject(pi.hProcess, INFINITE);
 }
 
-int main(int argc, char **argv)
+internal char *ParseCommandLine()
 {
-    CommandLineInput input = GetCommandStringFromInput(argc, argv);
+    LPSTR cmdLine = GetCommandLineA();
 
-    if (input.echo) {
-        printf("=== %s ===\n", input.command.c_str());
+    if (*cmdLine == '"') {
+        ++cmdLine;
+        while (*cmdLine++ != '"')
+            ;
     }
+    else {
+        while (*cmdLine && *cmdLine != ' ' && *cmdLine != '\t') {
+            ++cmdLine;
+        }
+    }
+
+    while (*cmdLine == ' ' || *cmdLine == '\t') {
+        cmdLine++;
+    }
+
+    return cmdLine;
+}
+
+int main()
+{
+    char *cmd = ParseCommandLine();
+
+    printf("=== %s ===\n", cmd);
 
     LARGE_INTEGER freq, start, end;
 
     QueryPerformanceFrequency(&freq);
     QueryPerformanceCounter(&start);
 
-    ExecuteCommand(input.command.data());
+    ExecuteCommand(cmd);
 
     QueryPerformanceCounter(&end);
 
