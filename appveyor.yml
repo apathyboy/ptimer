@@ -8,7 +8,7 @@ build_script:
     .\build_msvc.bat
 after_build:
 - cmd: >-
-    7z a ptimer.zip c:\project\source\build\ptimer.exe
+    7z a ptimer.zip %APPVEYOR_BUILD_FOLDER%\build\ptimer.exe
 artifacts:
   - path: ptimer.zip
     name: ptimer
