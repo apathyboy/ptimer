@@ -20,6 +20,11 @@ void *memset(void *dest, int c, size_t count)
 }
 }
 
+struct CommandLine {
+    bool displayCmd = true;
+    char *cmd;
+};
+
 internal void Win32WriteConsole(const char *str)
 {
     DWORD charsWritten;
@@ -43,17 +48,20 @@ internal void Win32ExecuteCommand(char *cmd)
     WaitForSingleObject(pi.hProcess, INFINITE);
 }
 
-internal char *ParseCommandLine()
+internal CommandLine ParseCommandLine()
 {
-    LPSTR cmdLine = GetCommandLineA();
+    CommandLine cmdLine = {};
+    LPSTR cmdLineStr    = GetCommandLineA();
 
-    while (*cmdLine && *cmdLine != ' ' && *cmdLine != '\t') {
-        ++cmdLine;
+    while (*cmdLineStr && *cmdLineStr != ' ' && *cmdLineStr != '\t') {
+        ++cmdLineStr;
     }
 
-    while (*cmdLine == ' ' || *cmdLine == '\t') {
-        cmdLine++;
+    while (*cmdLineStr == ' ' || *cmdLineStr == '\t') {
+        cmdLineStr++;
     }
+
+    cmdLine.cmd = cmdLineStr;
 
     return cmdLine;
 }
@@ -153,14 +161,16 @@ int main()
 {
 
     LARGE_INTEGER freq, start, end;
-    char *cmd = ParseCommandLine();
+    CommandLine cmdLine = ParseCommandLine();
 
-    PrintCommandLine(cmd);
+    if (cmdLine.displayCmd) {
+        PrintCommandLine(cmdLine.cmd);
+    }
 
     QueryPerformanceFrequency(&freq);
     QueryPerformanceCounter(&start);
 
-    Win32ExecuteCommand(cmd);
+    Win32ExecuteCommand(cmdLine.cmd);
 
     QueryPerformanceCounter(&end);
 
