@@ -2,6 +2,7 @@ version: 1.0.{build}
 image:
   - Visual Studio 2017
 clone_folder: c:\project\source
+skip_tags: true
 build_script:
 - cmd: >-
     choco install ptime
