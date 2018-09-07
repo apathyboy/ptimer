@@ -1,0 +1,7 @@
+image:
+  - Visual Studio 2017
+clone_folder: c:\project\source
+build_script:
+- cmd: >-
+    call .\build_msvc.bat
+
