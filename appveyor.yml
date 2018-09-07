@@ -3,5 +3,7 @@ image:
 clone_folder: c:\project\source
 build_script:
 - cmd: >-
+    choco install ptime
+    
     call .\build_msvc.bat
 
