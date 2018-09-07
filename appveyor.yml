@@ -4,6 +4,8 @@ clone_folder: c:\project\source
 build_script:
 - cmd: >-
     choco install ptime
+    
+    call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 
     .\build_msvc.bat
 after_build:
