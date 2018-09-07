@@ -20,6 +20,11 @@ void *memset(void *dest, int c, size_t count)
 }
 }
 
+struct CommandLine {
+    bool displayCmd = true;
+    char *cmd;
+};
+
 internal void Win32WriteConsole(const char *str)
 {
     DWORD charsWritten;
@@ -36,24 +41,47 @@ internal void Win32ExecuteCommand(char *cmd)
     si.cb                  = sizeof(si);
     PROCESS_INFORMATION pi = {};
 
-    if (!CreateProcessA(NULL, cmd, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi)) {
-        ExitProcess(EXIT_FAILURE);
+    if (CreateProcessA(NULL, cmd, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi)) {
+        WaitForSingleObject(pi.hProcess, INFINITE);
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
     }
-
-    WaitForSingleObject(pi.hProcess, INFINITE);
 }
 
-internal char *ParseCommandLine()
+internal CommandLine ParseCommandLine()
 {
-    LPSTR cmdLine = GetCommandLineA();
+    CommandLine cmdLine = {};
+    LPSTR cmdLineStr    = GetCommandLineA();
 
-    while (*cmdLine && *cmdLine != ' ' && *cmdLine != '\t') {
-        ++cmdLine;
+    { // @note(eb): skip over the application name
+        while (*cmdLineStr && *cmdLineStr != ' ' && *cmdLineStr != '\t') {
+            ++cmdLineStr;
+        }
+
+        while (*cmdLineStr == ' ' || *cmdLineStr == '\t') {
+            cmdLineStr++;
+        }
     }
 
-    while (*cmdLine == ' ' || *cmdLine == '\t') {
-        cmdLine++;
+    // @note(eb): process command line arguments for ptimer if they are set
+    while (*cmdLineStr == '-') {
+        ++cmdLineStr;
+
+        if (*cmdLineStr == 'q') {
+            cmdLine.displayCmd = false;
+        }
+
+        // @note(eb): skip to next string
+        while (*cmdLineStr && *cmdLineStr != ' ' && *cmdLineStr != '\t') {
+            ++cmdLineStr;
+        }
+
+        while (*cmdLineStr == ' ' || *cmdLineStr == '\t') {
+            cmdLineStr++;
+        }
     }
+
+    cmdLine.cmd = cmdLineStr;
 
     return cmdLine;
 }
@@ -153,9 +181,17 @@ int main()
 {
 
     LARGE_INTEGER freq, start, end;
-    char *cmd = ParseCommandLine();
+    CommandLine cmdLine = ParseCommandLine();
 
-    PrintCommandLine(cmd);
+    if (cmdLine.displayCmd) {
+        PrintCommandLine(cmdLine.cmd);
+    }
+
+    char *cmd = reinterpret_cast<char *>(
+        VirtualAlloc(0, lstrlenA(cmdLine.cmd) + 8, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE));
+
+    lstrcpyA(cmd, "cmd /c ");
+    lstrcpyA(cmd + 7, cmdLine.cmd);
 
     QueryPerformanceFrequency(&freq);
     QueryPerformanceCounter(&start);
@@ -163,6 +199,8 @@ int main()
     Win32ExecuteCommand(cmd);
 
     QueryPerformanceCounter(&end);
+
+    VirtualFree(cmd, lstrlenA(cmd), MEM_RELEASE);
 
     PrintElapsedTime(static_cast<float>(end.QuadPart - start.QuadPart)
                      / static_cast<float>(freq.QuadPart));
