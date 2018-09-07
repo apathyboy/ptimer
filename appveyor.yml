@@ -2,8 +2,13 @@ image:
   - Visual Studio 2017
 clone_folder: c:\project\source
 build_script:
-- cmd: >-
+  - cmd: >-
     choco install ptime
-    
-    call .\build_msvc.bat
 
+    .\build_msvc.bat
+after_build:
+  - cmd: >-
+    7z a ptimer.zip c:\project\source\build\ptimer.exe
+artifacts:
+  - path: ptimer.zip
+    name: ptimer
