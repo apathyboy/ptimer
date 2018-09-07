@@ -41,11 +41,11 @@ internal void Win32ExecuteCommand(char *cmd)
     si.cb                  = sizeof(si);
     PROCESS_INFORMATION pi = {};
 
-    if (!CreateProcessA(NULL, cmd, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi)) {
-        ExitProcess(EXIT_FAILURE);
+    if (CreateProcessA(NULL, cmd, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi)) {
+        WaitForSingleObject(pi.hProcess, INFINITE);
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
     }
-
-    WaitForSingleObject(pi.hProcess, INFINITE);
 }
 
 internal CommandLine ParseCommandLine()
@@ -187,12 +187,20 @@ int main()
         PrintCommandLine(cmdLine.cmd);
     }
 
+    char *cmd = reinterpret_cast<char *>(
+        VirtualAlloc(0, lstrlenA(cmdLine.cmd) + 8, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE));
+
+    lstrcpyA(cmd, "cmd /c ");
+    lstrcpyA(cmd + 7, cmdLine.cmd);
+
     QueryPerformanceFrequency(&freq);
     QueryPerformanceCounter(&start);
 
-    Win32ExecuteCommand(cmdLine.cmd);
+    Win32ExecuteCommand(cmd);
 
     QueryPerformanceCounter(&end);
+
+    VirtualFree(cmd, lstrlenA(cmd), MEM_RELEASE);
 
     PrintElapsedTime(static_cast<float>(end.QuadPart - start.QuadPart)
                      / static_cast<float>(freq.QuadPart));
