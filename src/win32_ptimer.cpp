@@ -167,5 +167,5 @@ int main()
     PrintElapsedTime(static_cast<float>(end.QuadPart - start.QuadPart)
                      / static_cast<float>(freq.QuadPart));
 
-    return EXIT_SUCCESS;
+    ExitProcess(EXIT_SUCCESS);
 }
