@@ -1,3 +1,4 @@
+version: 1.0.{build}
 image:
   - Visual Studio 2017
 clone_folder: c:\project\source
@@ -15,8 +16,8 @@ artifacts:
   - path: ptimer.zip
     name: ptimer
 deploy:
-  release: ptimer-v$(appveyor_build_version)
-  description: 'Release description'
+  release: ptimer v$(appveyor_build_version)
+  description: 'Release v$(appveyor_build_version)'
   provider: GitHub
   auth_token:
     secure: DYtglKYbFY2kCjJMC8WW0Geeh9WRuZwl2YXZYQUSwgE+ibABWzsxmxD+uEzcFi4Y
@@ -25,4 +26,4 @@ deploy:
   prerelease: false
   on:
     branch: master                 # release from master branch only
-    appveyor_repo_tag: true        # deploy on tag push only
+    appveyor_repo_tag: false        # deploy on tag push only
