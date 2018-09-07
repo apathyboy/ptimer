@@ -53,12 +53,32 @@ internal CommandLine ParseCommandLine()
     CommandLine cmdLine = {};
     LPSTR cmdLineStr    = GetCommandLineA();
 
-    while (*cmdLineStr && *cmdLineStr != ' ' && *cmdLineStr != '\t') {
-        ++cmdLineStr;
+    { // @note(eb): skip over the application name
+        while (*cmdLineStr && *cmdLineStr != ' ' && *cmdLineStr != '\t') {
+            ++cmdLineStr;
+        }
+
+        while (*cmdLineStr == ' ' || *cmdLineStr == '\t') {
+            cmdLineStr++;
+        }
     }
 
-    while (*cmdLineStr == ' ' || *cmdLineStr == '\t') {
-        cmdLineStr++;
+    // @note(eb): process command line arguments for ptimer if they are set
+    while (*cmdLineStr == '-') {
+        ++cmdLineStr;
+
+        if (*cmdLineStr == 'q') {
+            cmdLine.displayCmd = false;
+        }
+
+        // @note(eb): skip to next string
+        while (*cmdLineStr && *cmdLineStr != ' ' && *cmdLineStr != '\t') {
+            ++cmdLineStr;
+        }
+
+        while (*cmdLineStr == ' ' || *cmdLineStr == '\t') {
+            cmdLineStr++;
+        }
     }
 
     cmdLine.cmd = cmdLineStr;
