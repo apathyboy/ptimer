@@ -1,9 +1,9 @@
 @echo off
 
 set PROJECT=ptimer
-set COMPILER_OPTIONS=-Oi -GS- -nologo -W4 -WX -permissive- -std:c++17
+set COMPILER_OPTIONS=-O2 -Oi -GS- -nologo -W4 -WX -permissive- -std:c++17
 set COMPILER_DEFINES=-D%PROJECT%_INTERNAL -DWIN32_LEAN_AND_MEAN
-set LINKER_OPTIONS=-out:ptimer.exe -subsystem:console -entry:main
+set LINKER_OPTIONS=-out:ptimer.exe -subsystem:console -entry:main -nodefaultlib
 set LINKER_LIBRARIES=Kernel32.lib User32.lib
 
 if not exist %~dp0build mkdir %~dp0build
