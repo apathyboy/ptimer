@@ -177,11 +177,27 @@ internal void PrintElapsedTime(float t)
     Win32WriteConsole(timeStr);
 }
 
+internal void PrintHelpString()
+{
+    Win32WriteConsole("ptimer - https://github.com/apathyboy/ptimer\n");
+    Win32WriteConsole("Copyright (c) 2018, Eric Barr <ap@eb2.co>\n\n");
+    Win32WriteConsole("Syntax: ptimer [ptimer arguments ...] command [arguments ...]\n\n");
+    Win32WriteConsole("Arguments:\n");
+    Win32WriteConsole("\t-q\tStops displaying the command before executing.\n\n");
+    Win32WriteConsole(
+        "ptimer runs the given command with arguments and measures run time in seconds.\n");
+}
+
 int main()
 {
 
     LARGE_INTEGER freq, start, end;
     CommandLine cmdLine = ParseCommandLine();
+
+    if (!lstrlenA(cmdLine.cmd)) {
+        PrintHelpString();
+        ExitProcess(EXIT_SUCCESS);
+    }
 
     if (cmdLine.displayCmd) {
         PrintCommandLine(cmdLine.cmd);
